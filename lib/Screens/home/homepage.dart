@@ -7,6 +7,8 @@ import 'package:todo_app/utils/textstyle.dart';
 import 'package:todo_app/widgets/globalwidgets.dart';
 import 'package:http/http.dart' as http;
 
+bool isapideleting = false;
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -47,11 +49,14 @@ class _HomePageState extends State<HomePage> {
     print(responsebody);
     return responsebody;
   }
-  deltemethod(String id)async{
-     final api =
-        'https://crudcrud.com/api/834d37e8bf394f118d4f0c7ff1a24b8a/unicorns';
+
+  deltemethod(String id) async {
+    final api =
+        'https://crudcrud.com/api/834d37e8bf394f118d4f0c7ff1a24b8a/unicorns/$id';
     final uri = Uri.parse(api);
-    final response = await http.delete(uri);
+    final response = await http.delete(
+      uri,
+    );
   }
 
   final TextEditingController _controllerforAddTask = TextEditingController();
@@ -81,40 +86,52 @@ class _HomePageState extends State<HomePage> {
               )
             ],
           )),
-      body: SafeArea(
-          child: FutureBuilder(
-        future: getdata(),
-        builder: (context, AsyncSnapshot snapshot) {
-          if (snapshot.hasData) {
-            return ListView.builder(
-              itemCount: snapshot.data.length,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      child: Icon(Icons.flag),
-                    ),
-                    title: Text(snapshot.data[index]['name']),
-                    tileColor: AppColor.buttonColor,
-                    trailing: SizedBox(
-                        width: width * 0.250,
-                        child: Row(
-                          children: [
-                            IconButton(
-                                onPressed: () {}, icon: Icon(Icons.delete)),
-                            IconButton(
-                                onPressed: () {}, icon: Icon(Icons.edit)),
-                          ],
-                        )),
-                  ),
-                );
+      body: isapideleting
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : SafeArea(
+              child: FutureBuilder(
+              future: getdata(),
+              builder: (context, AsyncSnapshot snapshot) {
+                if (snapshot.hasData) {
+                  return ListView.builder(
+                    itemCount: snapshot.data.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            child: Icon(Icons.flag),
+                          ),
+                          title: Text(snapshot.data[index]['name']),
+                          tileColor: AppColor.buttonColor,
+                          trailing: SizedBox(
+                              width: width * 0.250,
+                              child: Row(
+                                children: [
+                                  IconButton(
+                                      onPressed: () async {
+                                        showusccessmessage(
+                                            context, 'Deleting Task');
+                                        await deltemethod(
+                                            snapshot.data[index]['_id']);
+                                        isapideleting = false;
+                                        setState(() {});
+                                      },
+                                      icon: Icon(Icons.delete)),
+                                  IconButton(
+                                      onPressed: () {}, icon: Icon(Icons.edit)),
+                                ],
+                              )),
+                        ),
+                      );
+                    },
+                  );
+                }
+                return Center(child: CircularProgressIndicator());
               },
-            );
-          }
-          return Center(child: CircularProgressIndicator());
-        },
-      )),
+            )),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColor.buttonColor,
         onPressed: () {
@@ -150,11 +167,10 @@ class _HomePageState extends State<HomePage> {
                               child: Text('Close'),
                             ),
                             TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  PostMethod();
-                                  getdata();
-                                });
+                              onPressed: () async {
+                                await PostMethod();
+                                getdata();
+                                setState(() {});
                                 Navigator.pop(context);
                               },
                               child: Text('Add'),
