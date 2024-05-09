@@ -27,7 +27,7 @@ class _HomePageState extends State<HomePage> {
       "colour": "blue"
     };
     final api =
-        'https://crudcrud.com/api/834d37e8bf394f118d4f0c7ff1a24b8a/unicorns';
+        'https://crudcrud.com/api/db5e740931164209b157b611f2b62405/unicorns';
     final uri = Uri.parse(api);
     final response = await http.post(uri,
         body: jsonEncode(body), headers: {'Content-Type': 'application/json'});
@@ -42,7 +42,7 @@ class _HomePageState extends State<HomePage> {
 
   getdata() async {
     final api =
-        'https://crudcrud.com/api/834d37e8bf394f118d4f0c7ff1a24b8a/unicorns';
+        'https://crudcrud.com/api/db5e740931164209b157b611f2b62405/unicorns';
     final uri = Uri.parse(api);
     final response = await http.get(uri);
     var responsebody = jsonDecode(response.body);
@@ -52,11 +52,26 @@ class _HomePageState extends State<HomePage> {
 
   deltemethod(String id) async {
     final api =
-        'https://crudcrud.com/api/834d37e8bf394f118d4f0c7ff1a24b8a/unicorns/$id';
+        'https://crudcrud.com/api/db5e740931164209b157b611f2b62405/unicorns/$id';
     final uri = Uri.parse(api);
     final response = await http.delete(
       uri,
     );
+  }
+
+  updatemethod(String id) async {
+    final api =
+        'https://crudcrud.com/api/db5e740931164209b157b611f2b62405/unicorns/$id';
+    final uri = Uri.parse(api);
+    final body = {
+      "title": "usman",
+      "description": "shah",
+      "age": "2",
+      "color": "blue"
+    };
+    final response = await http.put(uri,
+        body: jsonEncode(body), headers: {'Content-Type': 'application/json'});
+    return response;
   }
 
   final TextEditingController _controllerforAddTask = TextEditingController();
@@ -94,42 +109,47 @@ class _HomePageState extends State<HomePage> {
               child: FutureBuilder(
               future: getdata(),
               builder: (context, AsyncSnapshot snapshot) {
-                if (snapshot.hasData) {
-                  return ListView.builder(
-                    itemCount: snapshot.data.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            child: Icon(Icons.flag),
-                          ),
-                          title: Text(snapshot.data[index]['name']),
-                          tileColor: AppColor.buttonColor,
-                          trailing: SizedBox(
-                              width: width * 0.250,
-                              child: Row(
-                                children: [
-                                  IconButton(
-                                      onPressed: () async {
-                                        showusccessmessage(
-                                            context, 'Deleting Task');
-                                        await deltemethod(
-                                            snapshot.data[index]['_id']);
-                                        isapideleting = false;
-                                        setState(() {});
-                                      },
-                                      icon: Icon(Icons.delete)),
-                                  IconButton(
-                                      onPressed: () {}, icon: Icon(Icons.edit)),
-                                ],
-                              )),
-                        ),
-                      );
-                    },
+                if (!snapshot.hasData) {
+                  return Center(
+                    child: Image.asset('assets/images/empty.png'),
                   );
                 }
-                return Center(child: CircularProgressIndicator());
+                return ListView.builder(
+                  itemCount: snapshot.data.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          child: Icon(Icons.flag),
+                        ),
+                        title: Text(snapshot.data[index]['name']),
+                        subtitle:
+                            Text('${snapshot.data[index]['description']}'),
+                        tileColor: AppColor.buttonColor,
+                        trailing: SizedBox(
+                            width: width * 0.250,
+                            child: Row(
+                              children: [
+                                IconButton(
+                                    onPressed: () async {
+                                      showusccessmessage(
+                                          context, 'Deleting Task');
+                                      await deltemethod(
+                                          snapshot.data[index]['_id']);
+                                      isapideleting = false;
+                                      setState(() {});
+                                    },
+                                    icon: Icon(Icons.delete)),
+                                IconButton(
+                                    onPressed: () async {},
+                                    icon: Icon(Icons.edit)),
+                              ],
+                            )),
+                      ),
+                    );
+                  },
+                );
               },
             )),
       floatingActionButton: FloatingActionButton(
